@@ -40,11 +40,89 @@ ChatBot::~ChatBot()
         delete _image;
         _image = NULL;
     }
+    //cout << "destruct done!\n";
 }
 
 //// STUDENT CODE
 ////
+//// STUDENT CODE
+////
+ChatBot::ChatBot(const ChatBot &source) { //copy costructor
+  std::cout << "ChatBot copy Constructor" << std::endl;
 
+  // invalidate data handles
+    this->_currentNode = nullptr;
+    this->_rootNode = nullptr;
+    this->_chatLogic = nullptr;
+
+
+  // load image into heap memory
+  _image = new wxBitmap();
+  *_image = *source._image;
+}
+
+ChatBot & ChatBot::operator=(const ChatBot &source) { //copy assignment operator
+  std::cout << "ChatBot copy assign" << std::endl;
+  if (this == &source) {
+    return *this;
+  } else {
+    delete this->_image;
+    this->_image = new wxBitmap();
+    *(this->_image) = *(source._image);
+
+    this->_currentNode = nullptr;
+    this->_rootNode = nullptr;
+    this->_chatLogic = nullptr;
+
+    return *this;
+  }
+}
+
+ChatBot::ChatBot(ChatBot &&source) { //move costructor
+  std::cout << "ChatBot move Constructor" << std::endl;
+
+  // invalidate data handles
+    this->_currentNode = source._currentNode;
+    this->_rootNode = source._rootNode;
+    this->_chatLogic = source._chatLogic;
+    _chatLogic->SetChatbotHandle(this);
+
+  // load image into heap memory
+  _image = source._image;
+
+    // set source to null
+    source._currentNode = nullptr;
+    source._rootNode = nullptr;
+    source._chatLogic = nullptr;
+    source._image = NULL;
+}
+
+ChatBot & ChatBot::operator=(ChatBot &&source) { //move assignment operator
+std::cout << "ChatBot move assignment!" << std::endl;
+    if (this == &source) {
+        return *this;
+    }
+    if (_image != NULL) {
+        delete _image;
+    }
+    
+    
+    this->_currentNode = source._currentNode;
+    this->_rootNode = source._rootNode;
+    this->_chatLogic = source._chatLogic;
+    _chatLogic->SetChatbotHandle(this);
+    //cout << "before image assn done!\n";
+    this->_image = source._image;
+    //cout << "self assn done!\n";
+    source._image = NULL;
+    source._rootNode = nullptr;
+    source._currentNode = nullptr;
+    source._chatLogic = nullptr;
+
+    //cout << "Move assn done!\n";
+    return *this;
+    
+}
 ////
 //// EOF STUDENT CODE
 
@@ -92,8 +170,10 @@ void ChatBot::SetCurrentNode(GraphNode *node)
     std::mt19937 generator(int(std::time(0)));
     std::uniform_int_distribution<int> dis(0, answers.size() - 1);
     std::string answer = answers.at(dis(generator));
-
+    //cout << "before send done!\n";
     // send selected node answer to user
+    if(_chatLogic == nullptr ||_chatLogic == NULL)
+        cout << "error: misssing _chatLogic handle!\n";
     _chatLogic->SendMessageToUser(answer);
 }
 
